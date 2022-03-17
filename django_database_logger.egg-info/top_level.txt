@@ -1,0 +1,5 @@
+database_logger
+database_logger/management/commands/
+database_logger/migrations
+database_logger/templates/email
+database_logger/templates/email/components
