@@ -64,6 +64,9 @@ class LogEntry(models.Model):
             'IP_ADDRESS': ip,
         }
 
+    class Meta:
+        app_label = 'database_logger'
+
 
 class LogUsers(models.Model):
     log_entry = models.ForeignKey(LogEntry, on_delete=models.CASCADE, related_name='involved_users')
@@ -74,6 +77,9 @@ class LogUsers(models.Model):
     involved_user = GenericForeignKey('involved_user_content_type', 'involved_user_object_id')
     role = models.CharField(max_length=255, db_index=True)
 
+    class Meta:
+        app_label = 'database_logger'
+
 
 class LogEntities(models.Model):
     log_entry = models.ForeignKey(LogEntry, on_delete=models.CASCADE, related_name='involved_entities')
@@ -82,9 +88,15 @@ class LogEntities(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
     role = models.CharField(max_length=255, db_index=True, blank=True, null=True)
 
+    class Meta:
+        app_label = 'database_logger'
+
 
 class Notifications(models.Model):
     start = models.DateTimeField()
     end = models.DateTimeField()
     app = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
+
+    class Meta:
+        app_label = 'database_logger'
