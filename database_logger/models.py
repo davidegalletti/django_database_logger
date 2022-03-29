@@ -43,18 +43,23 @@ class LogEntry(models.Model):
                                                blank=True)
     auth_user_object_id = models.PositiveIntegerField(null=True, blank=True)
     auth_user = GenericForeignKey('auth_user_content_type', 'auth_user_object_id')
-#    authenticated_user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='log_entries',
-#                                           on_delete=models.CASCADE)
-#    involved_users = models.ManyToManyField(to=settings.AUTH_USER_MODEL, blank=True, through='LogUsers',
-#                                            related_name='other_log_entries')
 
     @staticmethod
     def kwargs_from_request(request):
         user_agent = parse_user_agents(request.META['HTTP_USER_AGENT'])
+        cookies = ''
+        try:
+            cookies = str(request.META['COOKIES'])
+        except KeyError as ex:
+            pass
+        ip = ''
         try:
             ip = str(request.META['HTTP_X_FORWARDED_FOR'])
-        except:
-            ip = str(request.META['REMOTE_ADDR'])
+        except KeyError as ex:
+            try:
+                ip = str(request.META['REMOTE_ADDR'])
+            except KeyError as ex:
+                pass
         auth_user = None
         if request.user.is_authenticated:
             auth_user = request.user
@@ -62,6 +67,7 @@ class LogEntry(models.Model):
             "auth_user": auth_user,
             'HTTP_USER_AGENT': str(user_agent),
             'IP_ADDRESS': ip,
+            'COOKIES': cookies,
         }
 
     class Meta:

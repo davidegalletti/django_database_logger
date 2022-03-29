@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: django-database-logger
-Version: 0.5
+Version: 0.8
 Summary: A Django app to log on a database
 Home-page: https://github.com/davidegalletti/django_database_logger
 Author: Davide Galletti
@@ -9,6 +9,7 @@ License: BSD-3-Clause
 Platform: UNKNOWN
 Classifier: Environment :: Web Environment
 Classifier: Framework :: Django
+Classifier: Framework :: Django :: 2.0
 Classifier: Framework :: Django :: 3.0
 Classifier: Intended Audience :: Developers
 Classifier: License :: OSI Approved :: BSD License
