@@ -4,6 +4,7 @@ from database_logger.models import LogEntry
 
 test1_logger = logging.getLogger('test1')
 
+
 def test1(request):
     kwargs = LogEntry.kwargs_from_request(request)
     kwargs["action_performed"] = 'Test 1'
@@ -12,6 +13,5 @@ def test1(request):
         'key2': 'Still a dictionary',
     }]
     test1_logger.info(kwargs["action_performed"], kwargs)
-
 
     return HttpResponse("DEBUG")
