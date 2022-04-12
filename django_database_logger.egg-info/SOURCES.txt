@@ -13,6 +13,7 @@ database_logger/views.py
 database_logger/management/commands/database_logger_notify.py
 database_logger/migrations/0001_initial.py
 database_logger/migrations/0002_alter_logentry_level_name_alter_logentry_name.py
+database_logger/migrations/0003_alter_logentry_extra_info_json.py
 database_logger/migrations/__init__.py
 database_logger/templates/email/email_notification.html
 database_logger/templates/email/components/notification.html
