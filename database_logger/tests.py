@@ -1,3 +1,4 @@
+from django.db.models import Model
 from django.test import TestCase
 import logging
 from .models import LogEntry
@@ -26,7 +27,7 @@ class DBLoggerModelTests(TestCase):
     def init_user(self):
         try:
             usr = User.objects.get(username='pippo')
-        except:
+        except Model.DoesNotExists:
             usr = User(username='pippo', last_name='Gota', first_name='Filippo', password='lapassword')
             usr.save()
         authenticate(username='pippo', password='lapassword')
@@ -39,8 +40,7 @@ class DBLoggerModelTests(TestCase):
         usr = self.user
         rf = RequestFactory()
         kwargs = {
-                'action_peformed': 'paziente_senza_mail',
-                'main_instance': "Ciccio Formaggio"
+                'action_peformed': 'paziente_senza_mail'
         }
         request = rf.post('/pippo/', data=kwargs, HTTP_USER_AGENT='Mozilla/5.0')
         request.user = usr
@@ -60,7 +60,6 @@ class DBLoggerModelTests(TestCase):
         request.user = usr
         kwargs = LogEntry.kwargs_from_request(request)
         kwargs['action_performed'] = 'paziente_senza_mail'
-        kwargs['main_instance'] = "Ciccio Formaggio"
         msg = "verifica utente"
         db_logger.info(msg, kwargs)
         logentry = LogEntry.objects.filter().order_by('-creation_time').first()
