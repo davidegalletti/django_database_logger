@@ -79,7 +79,7 @@ class DBLoggerModelTests(TestCase):
 
 
     def test_is_writing(self):
-        """verifica se trova il messaggio nel database"""
+        """check if it finds the message in the database"""
         db_logger = self.logger
         usr = self.user
         rf = RequestFactory()
@@ -96,7 +96,7 @@ class DBLoggerModelTests(TestCase):
         self.assertIs(testvar, True)
 
     def test_user(self):
-        """verifica se il log è associato all'utente"""
+        """check if the log is associated with the user"""
         db_logger = self.logger
         usr = self.user
         rf = RequestFactory()
@@ -110,7 +110,7 @@ class DBLoggerModelTests(TestCase):
         self.assertIs(usr.id, logentry.auth_user_object_id)
 
     def test_extra_info(self):
-        """verifica se l'extra_info è associato correttamente"""
+        """check if the extra_info is associated correctly"""
         db_logger = self.logger
         usr = self.user
         rf = RequestFactory()
@@ -128,7 +128,7 @@ class DBLoggerModelTests(TestCase):
         self.assertEquals(last_logentry.pk, ei_logentry.pk)
 
     def test_notifier(self):
-        """verifica se il notifier funziona correttamente"""
+        """check if the notifier is working correctly"""
         db_logger = self.logger
         usr = self.user
         rf = RequestFactory()
