@@ -39,7 +39,7 @@ class LogEntry(models.Model):
 
     action_performed = models.CharField(max_length=100, db_index=True)
 
-    extra_info_json = models.JSONField(default='{}', encoder=DjangoJSONEncoder)
+    extra_info_json = models.JSONField(default=dict, encoder=DjangoJSONEncoder)
     auth_user_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='+', null=True,
                                                blank=True)
     auth_user_object_id = models.PositiveIntegerField(null=True, blank=True)
