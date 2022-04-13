@@ -7,13 +7,55 @@ from .models import LogEntry
 from .logger import DatabaseLogHandler
 from django.test.client import RequestFactory
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
+from io import StringIO
+from django.core.management import call_command
+from django.core import mail
 
 class DBLoggerModelTests(TestCase):
     def __init__(self, *args, **kwargs):
         super(DBLoggerModelTests, self).__init__(*args, **kwargs)
         self.logger = self.init_logger()
         self.user = self.init_user()
+        self.fake_path = '/pippo/'
+        self.fake_agent = 'Mozilla/5.0'
+
+        self.logger_settings = {
+                'logs' : ['db_logger'],
+                'db_logger': {
+                    'reports': {
+                        'summary': {
+                            'title': 'SUMMARY',
+                            'group_by': 'auth_user',
+                            'summarize_by': ['action_performed'],
+                            'details': False
+                        },
+                    },
+                    'active': True,
+                    'notifications': [
+                        {
+                            'name': 'Daily',
+                            'frequency': 'd',  # h hour, d day, w week, m month
+                            'email': ['test@example.com'],
+                            'reports': ['summary']
+                        },
+                    ]
+                },
+            }
+
+
+
+    def call_notify_command(self, *args, **kwargs):
+        with self.settings(DATABASE_LOGGER=self.logger_settings, SITE_NAME='test_suite'):
+            out = StringIO()
+            call_command(
+                "database_logger_notify",
+                *args,
+                stdout=out,
+                stderr=StringIO(),
+                **kwargs,
+            )
+            return out.getvalue()
 
 
     def init_logger(self):
@@ -44,7 +86,7 @@ class DBLoggerModelTests(TestCase):
         kwargs = {
                 'action_peformed': 'test_is_writing'
         }
-        request = rf.post('/pippo/', data=kwargs, HTTP_USER_AGENT='Mozilla/5.0')
+        request = rf.post(self.fake_path, data=kwargs, HTTP_USER_AGENT=self.fake_agent)
         request.user = usr
         kwargs = LogEntry.kwargs_from_request(request)
         msg = "un messaggio di test"
@@ -58,7 +100,7 @@ class DBLoggerModelTests(TestCase):
         db_logger = self.logger
         usr = self.user
         rf = RequestFactory()
-        request = rf.post('/pippo/', HTTP_USER_AGENT='Mozilla/5.0')
+        request = rf.post(self.fake_path, HTTP_USER_AGENT=self.fake_agent)
         request.user = usr
         kwargs = LogEntry.kwargs_from_request(request)
         kwargs['action_performed'] = 'test_user'
@@ -72,7 +114,7 @@ class DBLoggerModelTests(TestCase):
         db_logger = self.logger
         usr = self.user
         rf = RequestFactory()
-        request = rf.post('/pippo/', HTTP_USER_AGENT='Mozilla/5.0')
+        request = rf.post(self.fake_path, HTTP_USER_AGENT=self.fake_agent)
         request.user = usr
         kwargs = LogEntry.kwargs_from_request(request)
         kwargs['action_performed'] = 'test_extra_info'
@@ -85,4 +127,24 @@ class DBLoggerModelTests(TestCase):
         ei_logentry = LogEntry.objects.filter(extra_info_json__my_extra_info=my_extra_info).order_by('-creation_time').first()
         self.assertEquals(last_logentry.pk, ei_logentry.pk)
 
+    def test_notifier(self):
+        """verifica se il notifier funziona correttamente"""
+        db_logger = self.logger
+        usr = self.user
+        rf = RequestFactory()
+        request = rf.post(self.fake_path, HTTP_USER_AGENT=self.fake_agent)
+        request.user = usr
+        kwargs = LogEntry.kwargs_from_request(request)
+        kwargs['action_performed'] = 'test_notifier'
+        msg = "test_notifier"
+        db_logger.info(msg, kwargs)
+        #set the creation_time to yesterday, so it is taken into account for the report
+        for le in LogEntry.objects.all():
+            le.creation_time += datetime.timedelta(days=-1)
+            le.save()
+        self.call_notify_command()
+        #check if an email has been sent
+        self.assertEqual(len(mail.outbox), 1)
+        #verify that "[test_suite]" is contained in the subject of the message
+        self.assertTrue('[test_suite]' in mail.outbox[0].subject)
 
