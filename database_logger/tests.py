@@ -1,3 +1,5 @@
+import datetime
+
 from django.db.models import Model
 from django.test import TestCase
 import logging
@@ -40,7 +42,7 @@ class DBLoggerModelTests(TestCase):
         usr = self.user
         rf = RequestFactory()
         kwargs = {
-                'action_peformed': 'paziente_senza_mail'
+                'action_peformed': 'test_is_writing'
         }
         request = rf.post('/pippo/', data=kwargs, HTTP_USER_AGENT='Mozilla/5.0')
         request.user = usr
@@ -59,10 +61,28 @@ class DBLoggerModelTests(TestCase):
         request = rf.post('/pippo/', HTTP_USER_AGENT='Mozilla/5.0')
         request.user = usr
         kwargs = LogEntry.kwargs_from_request(request)
-        kwargs['action_performed'] = 'paziente_senza_mail'
+        kwargs['action_performed'] = 'test_user'
         msg = "verifica utente"
         db_logger.info(msg, kwargs)
         logentry = LogEntry.objects.filter().order_by('-creation_time').first()
         self.assertIs(usr.id, logentry.auth_user_object_id)
+
+    def test_extra_info(self):
+        """verifica se l'extra_info è associato correttamente"""
+        db_logger = self.logger
+        usr = self.user
+        rf = RequestFactory()
+        request = rf.post('/pippo/', HTTP_USER_AGENT='Mozilla/5.0')
+        request.user = usr
+        kwargs = LogEntry.kwargs_from_request(request)
+        kwargs['action_performed'] = 'test_extra_info'
+        now = datetime.datetime.now()
+        my_extra_info = f'timed extra info {now}'
+        kwargs['my_extra_info'] = my_extra_info
+        msg = "verifica extra_info"
+        db_logger.info(msg, kwargs)
+        last_logentry = LogEntry.objects.all().order_by('-creation_time').first()
+        ei_logentry = LogEntry.objects.filter(extra_info_json__my_extra_info=my_extra_info).order_by('-creation_time').first()
+        self.assertEquals(last_logentry.pk, ei_logentry.pk)
 
 
