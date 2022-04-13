@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from user_agents import parse as parse_user_agents
 
@@ -38,7 +39,7 @@ class LogEntry(models.Model):
 
     action_performed = models.CharField(max_length=100, db_index=True)
 
-    extra_info_json = models.JSONField(default='{}')
+    extra_info_json = models.JSONField(default='{}', encoder=DjangoJSONEncoder)
     auth_user_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='+', null=True,
                                                blank=True)
     auth_user_object_id = models.PositiveIntegerField(null=True, blank=True)
