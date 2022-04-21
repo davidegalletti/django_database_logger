@@ -1,6 +1,5 @@
 import datetime
 
-from django.db.models import Model
 from django.test import TestCase
 import logging
 from .models import LogEntry
@@ -43,8 +42,6 @@ class DBLoggerModelTests(TestCase):
                 },
             }
 
-
-
     def call_notify_command(self, *args, **kwargs):
         with self.settings(DATABASE_LOGGER=self.logger_settings, SITE_NAME='test_suite'):
             out = StringIO()
@@ -57,7 +54,6 @@ class DBLoggerModelTests(TestCase):
             )
             return out.getvalue()
 
-
     def init_logger(self):
         logger = logging.getLogger('db_logger')
         logger.setLevel(logging.DEBUG)
@@ -69,14 +65,10 @@ class DBLoggerModelTests(TestCase):
         return logger
 
     def init_user(self):
-        try:
-            usr = User.objects.get(username='pippo')
-        except Model.DoesNotExists:
-            usr = User(username='pippo', last_name='Gota', first_name='Filippo', password='lapassword')
-            usr.save()
+        usr, created = User.objects.get_or_create(username='pippo', last_name='Gota', first_name='Filippo')
+        usr.set_password('lapassword')
         authenticate(username='pippo', password='lapassword')
         return usr
-
 
     def test_is_writing(self):
         """check if it finds the message in the database"""
