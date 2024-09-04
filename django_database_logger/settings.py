@@ -182,3 +182,7 @@ DATABASE_LOGGER = {
         ]
     },
 }
+
+# La versione va scritta qui, su setup.cfg e su registry/__init__.py version = "0.1.31"
+VERSION = "0.17.0"
+VERSION_COMMENT = "filtering out LAN IP addresses"

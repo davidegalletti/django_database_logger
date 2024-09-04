@@ -1,2 +1,5 @@
 /dist/
-# /django_database_logger.egg-info/
+/django_database_logger.egg-info/
+/db.sqlite3
+/Pipfile
+/Pipfile.lock

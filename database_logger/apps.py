@@ -5,6 +5,7 @@ import logging.config
 
 class DatabaseLoggerConfig(AppConfig):
     name = 'database_logger'
+    default_auto_field = 'django.db.models.BigAutoField'
 
     def ready(self):
         DatabaseLoggerConfig.append_logger()

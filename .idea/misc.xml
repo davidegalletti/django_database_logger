@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="Black">
+    <option name="sdkName" value="Pipenv (django_database_logger)" />
+  </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Pipenv (django_database_logger)" project-jdk-type="Python SDK" />
 </project>

@@ -1,3 +1,4 @@
+import ipaddress
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -39,7 +40,7 @@ class LogEntry(models.Model):
 
     action_performed = models.CharField(max_length=100, db_index=True)
 
-    extra_info_json = models.JSONField(default='{}', encoder=DjangoJSONEncoder)
+    extra_info_json = models.JSONField(default=dict, encoder=DjangoJSONEncoder)
     auth_user_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='+', null=True,
                                                blank=True)
     auth_user_object_id = models.PositiveIntegerField(null=True, blank=True)
@@ -61,6 +62,13 @@ class LogEntry(models.Model):
                 ip = str(request.META['REMOTE_ADDR'])
             except KeyError as ex:
                 pass
+        only_wan_ips = 'ONLY_WAN_IPS' in settings.DATABASE_LOGGER and settings.DATABASE_LOGGER['ONLY_WAN_IPS']
+        if only_wan_ips and ip and ',' in ip:
+            non_private_ips = []
+            for i in ip.split(','):
+                if not ipaddress.ip_address(i.strip()).is_private:
+                    non_private_ips.append(i.strip())
+            ip = ', '.join(non_private_ips)
         auth_user = None
         if request.user.is_authenticated:
             auth_user = request.user
@@ -77,7 +85,6 @@ class LogEntry(models.Model):
 
 class LogUsers(models.Model):
     log_entry = models.ForeignKey(LogEntry, on_delete=models.CASCADE, related_name='involved_users')
-#    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
     involved_user_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='+', null=True,
                                                    blank=True)
     involved_user_object_id = models.PositiveIntegerField(null=True, blank=True)
