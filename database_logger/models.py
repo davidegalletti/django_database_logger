@@ -63,7 +63,7 @@ class LogEntry(models.Model):
             except KeyError as ex:
                 pass
         only_wan_ips = 'ONLY_WAN_IPS' in settings.DATABASE_LOGGER and settings.DATABASE_LOGGER['ONLY_WAN_IPS']
-        if only_wan_ips and ip and ',' in ip:
+        if only_wan_ips and ip:
             non_private_ips = []
             for i in ip.split(','):
                 if not ipaddress.ip_address(i.strip()).is_private:
