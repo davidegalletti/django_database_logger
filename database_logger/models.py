@@ -1,10 +1,16 @@
 import ipaddress
+import logging
+
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
+from django.utils.safestring import mark_safe
 from user_agents import parse as parse_user_agents
+
+
+logger = logging.getLogger('django')
 
 
 class LogEntry(models.Model):
@@ -78,6 +84,31 @@ class LogEntry(models.Model):
             'IP_ADDRESS': ip,
             'COOKIES': cookies,
         }
+
+    @property
+    def diff_html(self):
+        if "diff" in self.extra_info_json:
+            diff = '<ul>'
+            for f in self.extra_info_json['diff']:
+                actual_field = self.main_instance_content_type.model_class()._meta.get_field(f)
+                old_value = self.extra_info_json['diff'][f]['old_value']
+                new_value = self.extra_info_json['diff'][f]['new_value']
+                if actual_field.choices:
+                    try:
+                        if old_value:
+                            old_value = '%s (%s)' % (dict(actual_field.flatchoices)[old_value], old_value)
+                        if new_value:
+                            new_value = '%s (%s)' % (dict(actual_field.flatchoices)[new_value], new_value)
+                    except Exception as ex:
+                        logger.error('diff_html id:%s ex:%s message:' % (self.id, str(ex), self.message))
+                if actual_field.verbose_name:
+                    name = actual_field.verbose_name
+                else:
+                    name = actual_field.name.replace('_', ' ').capitalize()
+                diff += '<li><strong>%s</strong>: %s &#10155; %s</li>' % (name, old_value, new_value)
+            diff += '</ul>'
+            return mark_safe(diff)
+        return ''
 
     class Meta:
         app_label = 'database_logger'
