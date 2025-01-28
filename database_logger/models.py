@@ -87,7 +87,7 @@ class LogEntry(models.Model):
 
     @property
     def diff_html(self):
-        if "diff" in self.extra_info_json:
+        if "diff" in self.extra_info_json and len(self.extra_info_json['diff'])>0:
             diff = '<ul>'
             for f in self.extra_info_json['diff']:
                 actual_field = self.main_instance_content_type.model_class()._meta.get_field(f)
