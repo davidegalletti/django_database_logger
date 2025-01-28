@@ -92,7 +92,11 @@ class LogEntry(models.Model):
             for f in self.extra_info_json['diff']:
                 actual_field = self.main_instance_content_type.model_class()._meta.get_field(f)
                 old_value = self.extra_info_json['diff'][f]['old_value']
+                if not old_value:
+                    old_value = ''
                 new_value = self.extra_info_json['diff'][f]['new_value']
+                if not new_value:
+                    new_value = ''
                 if actual_field.choices:
                     try:
                         if old_value:
@@ -105,7 +109,8 @@ class LogEntry(models.Model):
                     name = actual_field.verbose_name
                 else:
                     name = actual_field.name.replace('_', ' ').capitalize()
-                diff += '<li><strong>%s</strong>: %s &#10155; %s</li>' % (name, old_value, new_value)
+                if new_value or old_value:
+                    diff += '<li><strong>%s</strong>: %s &#10155; %s</li>' % (name, old_value, new_value)
             diff += '</ul>'
             return mark_safe(diff)
         return ''
