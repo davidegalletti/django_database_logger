@@ -14,8 +14,9 @@ class DatabaseLoggerConfig(AppConfig):
     def append_logger():
         try:
             if hasattr(settings, 'DATABASE_LOGGER'):
+                log_level = (settings.GLOBAL_LOG_LEVEL if hasattr(settings, 'GLOBAL_LOG_LEVEL') else 'DEBUG')
                 settings.LOGGING['handlers']['database_logger'] = {
-                    'level': 'DEBUG',
+                    'level': log_level,
                     'class': 'database_logger.logger.DatabaseLogHandler'
                 }
                 if 'logs' in settings.DATABASE_LOGGER:

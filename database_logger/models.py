@@ -105,6 +105,15 @@ class LogEntry(models.Model):
                             new_value = '%s (%s)' % (dict(actual_field.flatchoices)[new_value], new_value)
                     except Exception as ex:
                         logger.error('diff_html id:%s ex:%s message:' % (self.id, str(ex), self.message))
+                if actual_field.many_to_one or actual_field.one_to_one:
+                    try:
+                        if old_value:
+                            old_value = actual_field.related_model.objects.get(pk=old_value)
+                        if new_value:
+                            new_value = actual_field.related_model.objects.get(pk=new_value)
+                    except Exception as ex:
+                        logger.error('diff_html id:%s %s ex:%s' % (self.id, actual_field.name, str(ex)))
+                    
                 if actual_field.verbose_name:
                     name = actual_field.verbose_name
                 else:
