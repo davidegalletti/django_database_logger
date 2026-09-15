@@ -183,6 +183,7 @@ DATABASE_LOGGER = {
     },
 }
 
-# La versione va scritta qui, su setup.cfg e su registry/__init__.py version = "0.1.31"
-VERSION = "0.17.5"
-VERSION_COMMENT = "log level da cfg globale"
+# La versione va scritta su database_logger/__init__.py __version__ = "0.17.5"
+import database_logger
+VERSION = (database_logger.__version__ if hasattr(database_logger, '__version__') else '')
+VERSION_COMMENT =  (database_logger.__version_comment__ if hasattr(database_logger, '__version_comment__') else '')
